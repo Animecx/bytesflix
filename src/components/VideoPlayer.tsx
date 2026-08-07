@@ -86,7 +86,7 @@ export function VideoPlayer({
     }
 
     // hls.js for other browsers (lazy-loaded so it's only in the HLS chunk)
-    let hls: { destroy: () => void } | null = null;
+    let hls: import('hls.js').default | null = null;
     import('hls.js').then(({ default: Hls }) => {
       hls = new Hls();
       hls.loadSource(src);

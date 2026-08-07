@@ -4,7 +4,7 @@ import { Loader2, UploadCloud, Check, X, Link2, Save } from 'lucide-react';
 import { FileUpload } from '@/components/FileUpload';
 import { Modal } from '@/components/Modal';
 import {
-  detectVideoProvider, getVideoSourceInfo, slugify,
+  detectVideoProvider, getVideoSourceInfo, slugify, extractErrorMessage,
 } from '@/lib/utils';
 import {
   uploadFile, createVideo, createEpisode, updateVideo, updateEpisode,
@@ -175,7 +175,7 @@ export function EpisodeForm({ series, existingEpisodes, episode, onClose, onSave
 
       onSaved();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save episode.');
+      setError(extractErrorMessage(err, 'Failed to save episode.'));
     } finally {
       setSaving(false);
     }

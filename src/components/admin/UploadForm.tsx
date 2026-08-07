@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Loader2, UploadCloud, Check, X, Film, Tv, Link2 } from 'lucide-react';
 import { FileUpload } from '@/components/FileUpload';
-import { detectVideoProvider, getVideoSourceInfo } from '@/lib/utils';
+import { detectVideoProvider, getVideoSourceInfo, extractErrorMessage } from '@/lib/utils';
 import { uploadFile, createVideo, createSeries, createEpisode } from '@/lib/admin';
 import type { VideoType, VideoStatus } from '@/types';
 
@@ -174,7 +174,7 @@ export function UploadForm({ onUploaded }: UploadFormProps) {
       reset();
       onUploaded();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Upload failed. Please try again.');
+      setError(extractErrorMessage(err, 'Upload failed. Please try again.'));
     } finally {
       setUploading(false);
     }
