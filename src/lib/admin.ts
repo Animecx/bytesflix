@@ -62,7 +62,7 @@ export async function fetchAllProfiles(): Promise<Profile[]> {
   return (data ?? []) as Profile[];
 }
 
-export async function createVideo(input: Omit<Video, 'id' | 'created_at' | 'updated_at' | 'views'>): Promise<Video> {
+export async function createVideo(input: Omit<Video, 'id' | 'created_at' | 'updated_at' | 'views'> & Partial<Pick<Video, 'subtitle_url' | 'release_date'>>): Promise<Video> {
   const { data, error } = await supabase
     .from('videos')
     .insert(input)
@@ -115,7 +115,7 @@ export async function deleteVideo(id: string): Promise<void> {
   if (error) throw error;
 }
 
-export async function createSeries(input: Omit<Series, 'id' | 'created_at' | 'updated_at'>): Promise<Series> {
+export async function createSeries(input: Omit<Series, 'id' | 'created_at' | 'updated_at' | 'slug' | 'genre' | 'language' | 'year' | 'rating' | 'age_rating' | 'featured' | 'trending' | 'publish_status'> & Partial<Pick<Series, 'slug' | 'genre' | 'language' | 'year' | 'rating' | 'age_rating' | 'featured' | 'trending' | 'publish_status'>>): Promise<Series> {
   const slug = await ensureUniqueSeriesSlug(input.name);
   const { data, error } = await supabase
     .from('series')
@@ -172,7 +172,7 @@ async function ensureUniqueSeriesSlug(name: string): Promise<string> {
   return `${base}-${Date.now().toString(36).slice(-4)}`;
 }
 
-export async function createEpisode(input: Omit<Episode, 'id' | 'created_at'>): Promise<Episode> {
+export async function createEpisode(input: Omit<Episode, 'id' | 'created_at' | 'slug'> & Partial<Pick<Episode, 'slug'>>): Promise<Episode> {
   const slug = await ensureUniqueEpisodeSlug(input.series_id, input.season_number, input.episode_number);
   const { data, error } = await supabase
     .from('episodes')
