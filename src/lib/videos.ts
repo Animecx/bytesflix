@@ -116,14 +116,11 @@ export async function fetchSeriesById(id: string): Promise<Series | null> {
   return data as Series | null;
 }
 
-export async function fetchSeriesBySlug(slug: string): Promise<Series | null> {
-  const { data, error } = await supabase
-    .from('series')
-    .select('*')
-    .eq('slug', slug)
-    .maybeSingle();
-  if (error) throw error;
-  return data as Series | null;
+export async function fetchSeriesWithEpisodesById(id: string): Promise<SeriesWithEpisodes | null> {
+  const series = await fetchSeriesById(id);
+  if (!series) return null;
+  const episodes = await fetchEpisodesWithVideoBySeries(series.id);
+  return { ...series, episodes };
 }
 
 // ============================================================
@@ -178,16 +175,6 @@ export async function fetchEpisodeBySlug(seriesId: string, slug: string): Promis
     .maybeSingle();
   if (error) throw error;
   return data as EpisodeWithVideo | null;
-}
-
-/**
- * Fetch a series by slug together with all its published episodes (with videos).
- */
-export async function fetchSeriesWithEpisodesBySlug(slug: string): Promise<SeriesWithEpisodes | null> {
-  const series = await fetchSeriesBySlug(slug);
-  if (!series) return null;
-  const episodes = await fetchEpisodesWithVideoBySeries(series.id);
-  return { ...series, episodes };
 }
 
 export async function fetchVideoWithEpisodes(id: string): Promise<VideoWithEpisodes | null> {

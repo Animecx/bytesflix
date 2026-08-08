@@ -8,7 +8,7 @@ import {
 import { VideoPlayer } from '@/components/VideoPlayer';
 import { EmbedPlayer } from '@/components/EmbedPlayer';
 import {
-  fetchSeriesWithEpisodesBySlug, fetchEpisodeBySlug, incrementViews,
+  fetchSeriesWithEpisodesById, fetchEpisodeBySlug, incrementViews,
 } from '@/lib/videos';
 import {
   getResumePosition, saveContinueWatching,
@@ -19,7 +19,7 @@ import { formatDuration, formatViews, formatDate, detectVideoProvider } from '@/
 import type { SeriesWithEpisodes, EpisodeWithVideo } from '@/types';
 
 export default function SeriesWatch() {
-  const { seriesSlug, season, episodeSlug } = useParams<{ seriesSlug: string; season: string; episodeSlug: string }>();
+  const { seriesId, season, episodeSlug } = useParams<{ seriesId: string; season: string; episodeSlug: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -34,13 +34,13 @@ export default function SeriesWatch() {
 
   // Load series
   useEffect(() => {
-    if (!seriesSlug) return;
+    if (!seriesId) return;
     let mounted = true;
     (async () => {
       setLoading(true);
       setError(null);
       try {
-        const data = await fetchSeriesWithEpisodesBySlug(seriesSlug);
+        const data = await fetchSeriesWithEpisodesById(seriesId);
         if (!mounted) return;
         if (!data) {
           setError('Series not found.');
@@ -55,7 +55,7 @@ export default function SeriesWatch() {
       }
     })();
     return () => { mounted = false; };
-  }, [seriesSlug]);
+  }, [seriesId]);
 
   // Determine selected season from URL or default
   useEffect(() => {
@@ -152,7 +152,7 @@ export default function SeriesWatch() {
 
   const goToEpisode = useCallback((ep: EpisodeWithVideo) => {
     if (!series) return;
-    navigate(`/series/${series.slug}/season-${ep.season_number}/${ep.slug}`);
+    navigate(`/series/${series.id}/season-${ep.season_number}/${ep.slug}`);
   }, [series, navigate]);
 
   const handleProgress = useCallback(

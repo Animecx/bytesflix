@@ -14,7 +14,6 @@ export interface Series {
   description: string | null;
   poster_url: string | null;
   banner_url: string | null;
-  slug: string | null;
   genre: string | null;
   language: string | null;
   year: number | null;

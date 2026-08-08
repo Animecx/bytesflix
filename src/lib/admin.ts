@@ -1,6 +1,6 @@
 import { supabase, STORAGE_BUCKETS } from '@/lib/supabase';
 import type { Video, Series, Episode, EpisodeWithVideo, Profile, SiteSettings } from '@/types';
-import { slugify } from '@/lib/utils';
+
 
 export interface AdminStats {
   totalVideos: number;
@@ -115,11 +115,10 @@ export async function deleteVideo(id: string): Promise<void> {
   if (error) throw error;
 }
 
-export async function createSeries(input: Omit<Series, 'id' | 'created_at' | 'updated_at' | 'slug' | 'genre' | 'language' | 'year' | 'rating' | 'age_rating' | 'featured' | 'trending' | 'publish_status'> & Partial<Pick<Series, 'slug' | 'genre' | 'language' | 'year' | 'rating' | 'age_rating' | 'featured' | 'trending' | 'publish_status'>>): Promise<Series> {
-  const slug = await ensureUniqueSeriesSlug(input.name);
+export async function createSeries(input: Omit<Series, 'id' | 'created_at' | 'updated_at' | 'genre' | 'language' | 'year' | 'rating' | 'age_rating' | 'featured' | 'trending' | 'publish_status'> & Partial<Pick<Series, 'genre' | 'language' | 'year' | 'rating' | 'age_rating' | 'featured' | 'trending' | 'publish_status'>>): Promise<Series> {
   const { data, error } = await supabase
     .from('series')
-    .insert({ ...input, slug })
+    .insert(input)
     .select()
     .single();
   if (error) throw error;
@@ -155,21 +154,6 @@ export async function fetchEpisodesWithVideoAdmin(seriesId: string): Promise<Epi
     .order('episode_number', { ascending: true });
   if (error) throw error;
   return (data ?? []) as EpisodeWithVideo[];
-}
-
-async function ensureUniqueSeriesSlug(name: string): Promise<string> {
-  const base = slugify(name) || 'series';
-  let candidate = base;
-  for (let i = 0; i < 50; i++) {
-    const { data } = await supabase
-      .from('series')
-      .select('id')
-      .eq('slug', candidate)
-      .maybeSingle();
-    if (!data) return candidate;
-    candidate = `${base}-${i + 2}`;
-  }
-  return `${base}-${Date.now().toString(36).slice(-4)}`;
 }
 
 export async function createEpisode(input: Omit<Episode, 'id' | 'created_at' | 'slug' | 'title' | 'description' | 'thumbnail_url' | 'duration_minutes' | 'publish_status' | 'featured'> & Partial<Pick<Episode, 'slug' | 'title' | 'description' | 'thumbnail_url' | 'duration_minutes' | 'publish_status' | 'featured'>>): Promise<Episode> {
@@ -217,15 +201,7 @@ export async function deleteEpisode(id: string): Promise<void> {
 }
 
 async function ensureUniqueEpisodeSlug(seriesId: string, season: number, episode: number): Promise<string> {
-  const { data: series } = await supabase
-    .from('series')
-    .select('slug')
-    .eq('id', seriesId)
-    .maybeSingle();
-  const seriesSlug = (series as { slug: string | null } | null)?.slug;
-  const base = seriesSlug
-    ? `${seriesSlug}-s${season}-e${episode}`
-    : `s${season}-e${episode}`;
+  const base = `${seriesId.slice(0, 8)}-s${season}-e${episode}`;
   let candidate = base;
   for (let i = 0; i < 50; i++) {
     const { data } = await supabase
