@@ -44,7 +44,7 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/movies" element={<Movies />} />
                 <Route path="/series" element={<Series />} />
-                <Route path="/series/:seriesId/season-:season/:episodeSlug" element={<SeriesWatch />} />
+                <Route path="/series/:seriesId/season-:season/:episodeId" element={<SeriesWatch />} />
                 <Route path="/recently-added" element={<RecentlyAdded />} />
                 <Route path="/trending" element={<Trending />} />
                 <Route path="/search" element={<SearchResults />} />

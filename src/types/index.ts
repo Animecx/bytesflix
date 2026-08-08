@@ -65,7 +65,6 @@ export interface Episode {
   duration_minutes: number | null;
   publish_status: VideoStatus;
   featured: boolean;
-  slug: string | null;
   created_at: string;
 }
 

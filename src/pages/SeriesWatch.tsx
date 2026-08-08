@@ -8,7 +8,7 @@ import {
 import { VideoPlayer } from '@/components/VideoPlayer';
 import { EmbedPlayer } from '@/components/EmbedPlayer';
 import {
-  fetchSeriesWithEpisodesById, fetchEpisodeBySlug, incrementViews,
+  fetchSeriesWithEpisodesById, fetchEpisodeById, incrementViews,
 } from '@/lib/videos';
 import {
   getResumePosition, saveContinueWatching,
@@ -19,7 +19,7 @@ import { formatDuration, formatViews, formatDate, detectVideoProvider } from '@/
 import type { SeriesWithEpisodes, EpisodeWithVideo } from '@/types';
 
 export default function SeriesWatch() {
-  const { seriesId, season, episodeSlug } = useParams<{ seriesId: string; season: string; episodeSlug: string }>();
+  const { seriesId, season, episodeId } = useParams<{ seriesId: string; season: string; episodeId: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -63,13 +63,13 @@ export default function SeriesWatch() {
     if (!isNaN(s)) setSelectedSeason(s);
   }, [season]);
 
-  // Load current episode by slug
+  // Load current episode by id
   useEffect(() => {
-    if (!series || !episodeSlug) return;
+    if (!series || !episodeId) return;
     let mounted = true;
     (async () => {
       try {
-        const ep = await fetchEpisodeBySlug(series.id, episodeSlug);
+        const ep = await fetchEpisodeById(episodeId);
         if (!mounted) return;
         if (!ep) {
           setError('Episode not found.');
@@ -97,7 +97,7 @@ export default function SeriesWatch() {
       }
     })();
     return () => { mounted = false; };
-  }, [series, episodeSlug, user]);
+  }, [series, episodeId, user]);
 
   // Episodes grouped by season
   const seasons = useMemo(() => {
@@ -152,7 +152,7 @@ export default function SeriesWatch() {
 
   const goToEpisode = useCallback((ep: EpisodeWithVideo) => {
     if (!series) return;
-    navigate(`/series/${series.id}/season-${ep.season_number}/${ep.slug}`);
+    navigate(`/series/${series.id}/season-${ep.season_number}/${ep.id}`);
   }, [series, navigate]);
 
   const handleProgress = useCallback(

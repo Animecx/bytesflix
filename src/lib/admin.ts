@@ -156,11 +156,10 @@ export async function fetchEpisodesWithVideoAdmin(seriesId: string): Promise<Epi
   return (data ?? []) as EpisodeWithVideo[];
 }
 
-export async function createEpisode(input: Omit<Episode, 'id' | 'created_at' | 'slug' | 'title' | 'description' | 'thumbnail_url' | 'duration_minutes' | 'publish_status' | 'featured'> & Partial<Pick<Episode, 'slug' | 'title' | 'description' | 'thumbnail_url' | 'duration_minutes' | 'publish_status' | 'featured'>>): Promise<Episode> {
-  const slug = await ensureUniqueEpisodeSlug(input.series_id, input.season_number, input.episode_number);
+export async function createEpisode(input: Omit<Episode, 'id' | 'created_at' | 'title' | 'description' | 'thumbnail_url' | 'duration_minutes' | 'publish_status' | 'featured'> & Partial<Pick<Episode, 'title' | 'description' | 'thumbnail_url' | 'duration_minutes' | 'publish_status' | 'featured'>>): Promise<Episode> {
   const { data, error } = await supabase
     .from('episodes')
-    .insert({ ...input, slug })
+    .insert(input)
     .select()
     .single();
   if (error) throw error;
@@ -198,21 +197,6 @@ export async function deleteEpisode(id: string): Promise<void> {
 
   const { error } = await supabase.from('episodes').delete().eq('id', id);
   if (error) throw error;
-}
-
-async function ensureUniqueEpisodeSlug(seriesId: string, season: number, episode: number): Promise<string> {
-  const base = `${seriesId.slice(0, 8)}-s${season}-e${episode}`;
-  let candidate = base;
-  for (let i = 0; i < 50; i++) {
-    const { data } = await supabase
-      .from('episodes')
-      .select('id')
-      .eq('slug', candidate)
-      .maybeSingle();
-    if (!data) return candidate;
-    candidate = `${base}-${i + 2}`;
-  }
-  return `${base}-${Date.now().toString(36).slice(-4)}`;
 }
 
 export async function updateSettings(patch: Partial<SiteSettings>): Promise<SiteSettings> {

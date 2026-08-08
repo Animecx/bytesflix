@@ -4,7 +4,7 @@ import { Loader2, UploadCloud, Check, X, Link2, Save } from 'lucide-react';
 import { FileUpload } from '@/components/FileUpload';
 import { Modal } from '@/components/Modal';
 import {
-  detectVideoProvider, getVideoSourceInfo, slugify, extractErrorMessage,
+  detectVideoProvider, getVideoSourceInfo, extractErrorMessage,
 } from '@/lib/utils';
 import {
   uploadFile, createVideo, createEpisode, updateVideo, updateEpisode,

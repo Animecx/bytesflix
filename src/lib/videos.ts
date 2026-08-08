@@ -164,14 +164,13 @@ export async function fetchEpisodesWithVideoBySeries(seriesId: string): Promise<
 }
 
 /**
- * Fetch a single episode by its stable slug within a series, joined with video.
+ * Fetch a single episode by its UUID, joined with video.
  */
-export async function fetchEpisodeBySlug(seriesId: string, slug: string): Promise<EpisodeWithVideo | null> {
+export async function fetchEpisodeById(id: string): Promise<EpisodeWithVideo | null> {
   const { data, error } = await supabase
     .from('episodes')
     .select('*, video:videos(*)')
-    .eq('series_id', seriesId)
-    .eq('slug', slug)
+    .eq('id', id)
     .maybeSingle();
   if (error) throw error;
   return data as EpisodeWithVideo | null;
