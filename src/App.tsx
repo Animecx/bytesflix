@@ -20,6 +20,7 @@ const Login = lazy(() => import('@/pages/Login'));
 const Register = lazy(() => import('@/pages/Register'));
 const ForgotPassword = lazy(() => import('@/pages/ForgotPassword'));
 const Profile = lazy(() => import('@/pages/Profile'));
+const SeriesDetail = lazy(() => import('@/pages/SeriesDetail'));
 const SeriesWatch = lazy(() => import('@/pages/SeriesWatch'));
 const AdminDashboard = lazy(() => import('@/pages/AdminDashboard'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
@@ -44,6 +45,7 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/movies" element={<Movies />} />
                 <Route path="/series" element={<Series />} />
+                <Route path="/series/:seriesId" element={<SeriesDetail />} />
                 <Route path="/series/:seriesId/season-:season/:episodeId" element={<SeriesWatch />} />
                 <Route path="/recently-added" element={<RecentlyAdded />} />
                 <Route path="/trending" element={<Trending />} />

@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Loader2, UploadCloud, Check, X, Film, Tv, Link2 } from 'lucide-react';
+import { Loader2, UploadCloud, Check, X, Link2 } from 'lucide-react';
 import { FileUpload } from '@/components/FileUpload';
 import { detectVideoProvider, getVideoSourceInfo, extractErrorMessage } from '@/lib/utils';
-import { uploadFile, createVideo, createSeries, createEpisode } from '@/lib/admin';
-import type { VideoType, VideoStatus } from '@/types';
+import { uploadFile, createVideo } from '@/lib/admin';
+import type { VideoStatus } from '@/types';
 
 interface UploadFormProps {
   onUploaded: () => void;
@@ -18,7 +18,6 @@ interface FileSlot {
 export function UploadForm({ onUploaded }: UploadFormProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [type, setType] = useState<VideoType>('movie');
   const [genre, setGenre] = useState('');
   const [language, setLanguage] = useState('English');
   const [year, setYear] = useState<number | ''>('');
@@ -29,9 +28,6 @@ export function UploadForm({ onUploaded }: UploadFormProps) {
   const [trending, setTrending] = useState(false);
   const [status, setStatus] = useState<VideoStatus>('published');
   const [tags, setTags] = useState('');
-  const [seriesName, setSeriesName] = useState('');
-  const [seasonNumber, setSeasonNumber] = useState<number | ''>(1);
-  const [episodeNumber, setEpisodeNumber] = useState<number | ''>(1);
 
   const [posterSlot, setPosterSlot] = useState<FileSlot>({ file: null, previewUrl: null });
   const [bannerSlot, setBannerSlot] = useState<FileSlot>({ file: null, previewUrl: null });
@@ -51,7 +47,6 @@ export function UploadForm({ onUploaded }: UploadFormProps) {
   const reset = () => {
     setTitle('');
     setDescription('');
-    setType('movie');
     setGenre('');
     setLanguage('English');
     setYear('');
@@ -62,9 +57,6 @@ export function UploadForm({ onUploaded }: UploadFormProps) {
     setTrending(false);
     setStatus('published');
     setTags('');
-    setSeriesName('');
-    setSeasonNumber(1);
-    setEpisodeNumber(1);
     setPosterSlot({ file: null, previewUrl: null });
     setBannerSlot({ file: null, previewUrl: null });
     setVideoSlot({ file: null, previewUrl: null });
@@ -100,7 +92,6 @@ export function UploadForm({ onUploaded }: UploadFormProps) {
     setProgress(0);
 
     try {
-      // Upload files to storage
       const steps = 4;
       let done = 0;
       const bump = () => { done++; setProgress(Math.round((done / steps) * 100)); };
@@ -125,25 +116,12 @@ export function UploadForm({ onUploaded }: UploadFormProps) {
         : null;
       bump();
 
-      // Create series if needed
-      let seriesId: string | null = null;
-      if (type === 'series' && seriesName.trim()) {
-        const series = await createSeries({
-          name: seriesName.trim(),
-          description: description || null,
-          poster_url: posterUrl,
-          banner_url: bannerUrl,
-        });
-        seriesId = series.id;
-      }
-
-      // Create the video record
       const tagArray = tags.split(',').map((t) => t.trim()).filter(Boolean);
-      const video = await createVideo({
+      await createVideo({
         title: title.trim(),
         description: description.trim() || null,
-        type,
-        series_id: seriesId,
+        type: 'movie',
+        series_id: null,
         poster_url: posterUrl,
         banner_url: bannerUrl,
         video_url: finalVideoUrl,
@@ -160,16 +138,6 @@ export function UploadForm({ onUploaded }: UploadFormProps) {
         tags: tagArray,
       });
 
-      // Create episode record if series
-      if (type === 'series' && seriesId) {
-        await createEpisode({
-          video_id: video.id,
-          series_id: seriesId,
-          season_number: seasonNumber || 1,
-          episode_number: episodeNumber || 1,
-        });
-      }
-
       setSuccess(true);
       reset();
       onUploaded();
@@ -184,7 +152,7 @@ export function UploadForm({ onUploaded }: UploadFormProps) {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       {success && (
         <div className="mb-4 flex items-center gap-2 rounded-lg border border-success/30 bg-success/10 px-4 py-3 text-sm text-success">
-          <Check className="h-4 w-4" /> Video uploaded successfully! It will appear on the site immediately.
+          <Check className="h-4 w-4" /> Movie uploaded successfully! It will appear on the site immediately.
         </div>
       )}
       {error && (
@@ -194,40 +162,14 @@ export function UploadForm({ onUploaded }: UploadFormProps) {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Type selector */}
-        <div>
-          <label className="mb-2 block text-sm font-medium text-neutral-300">Content Type</label>
-          <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={() => setType('movie')}
-              className={`flex flex-1 items-center justify-center gap-2 rounded-xl border p-4 transition-colors ${
-                type === 'movie' ? 'border-primary bg-primary/10 text-white' : 'border-ink-border text-neutral-400 hover:bg-white/5'
-              }`}
-            >
-              <Film className="h-5 w-5" /> Movie
-            </button>
-            <button
-              type="button"
-              onClick={() => setType('series')}
-              className={`flex flex-1 items-center justify-center gap-2 rounded-xl border p-4 transition-colors ${
-                type === 'series' ? 'border-primary bg-primary/10 text-white' : 'border-ink-border text-neutral-400 hover:bg-white/5'
-              }`}
-            >
-              <Tv className="h-5 w-5" /> Series Episode
-            </button>
-          </div>
-        </div>
-
-        {/* Basic info */}
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2">
             <label className="mb-1.5 block text-sm font-medium text-neutral-300">Title *</label>
-            <input value={title} onChange={(e) => setTitle(e.target.value)} className="input-field" placeholder="Video title" required />
+            <input value={title} onChange={(e) => setTitle(e.target.value)} className="input-field" placeholder="Movie title" required />
           </div>
           <div className="sm:col-span-2">
             <label className="mb-1.5 block text-sm font-medium text-neutral-300">Description</label>
-            <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} className="input-field resize-none" placeholder="Video description" />
+            <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} className="input-field resize-none" placeholder="Movie description" />
           </div>
           <div>
             <label className="mb-1.5 block text-sm font-medium text-neutral-300">Genre</label>
@@ -264,25 +206,6 @@ export function UploadForm({ onUploaded }: UploadFormProps) {
           </div>
         </div>
 
-        {/* Series fields */}
-        {type === 'series' && (
-          <div className="grid gap-4 rounded-xl border border-ink-border bg-ink-soft/50 p-4 sm:grid-cols-3">
-            <div className="sm:col-span-3">
-              <label className="mb-1.5 block text-sm font-medium text-neutral-300">Series Name</label>
-              <input value={seriesName} onChange={(e) => setSeriesName(e.target.value)} className="input-field" placeholder="e.g. The Last Journey" />
-            </div>
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-neutral-300">Season Number</label>
-              <input type="number" min="1" value={seasonNumber} onChange={(e) => setSeasonNumber(e.target.value ? Number(e.target.value) : '')} className="input-field" />
-            </div>
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-neutral-300">Episode Number</label>
-              <input type="number" min="1" value={episodeNumber} onChange={(e) => setEpisodeNumber(e.target.value ? Number(e.target.value) : '')} className="input-field" />
-            </div>
-          </div>
-        )}
-
-        {/* File uploads */}
         <div className="grid gap-4 sm:grid-cols-2">
           <FileUpload
             label="Poster Image"
@@ -387,7 +310,6 @@ export function UploadForm({ onUploaded }: UploadFormProps) {
           />
         </div>
 
-        {/* Toggles */}
         <div className="grid gap-4 sm:grid-cols-3">
           <div>
             <label className="mb-1.5 block text-sm font-medium text-neutral-300">Status</label>
@@ -407,7 +329,6 @@ export function UploadForm({ onUploaded }: UploadFormProps) {
           </label>
         </div>
 
-        {/* Progress bar */}
         {uploading && (
           <div className="rounded-lg border border-ink-border bg-ink-soft p-4">
             <div className="mb-2 flex items-center gap-2 text-sm text-neutral-300">
@@ -420,7 +341,7 @@ export function UploadForm({ onUploaded }: UploadFormProps) {
         )}
 
         <button type="submit" disabled={uploading} className="btn-primary w-full">
-          {uploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <><UploadCloud className="h-5 w-5" /> Upload Video</>}
+          {uploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <><UploadCloud className="h-5 w-5" /> Upload Movie</>}
         </button>
       </form>
     </motion.div>

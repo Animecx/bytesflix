@@ -1,26 +1,25 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Tv, ChevronDown, ChevronRight, Plus, Pencil, Trash2, Eye, EyeOff,
-  Loader2, Search, ArrowLeft, Film, Calendar, Clock,
+  Tv, Plus, Pencil, Trash2, Eye, EyeOff,
+  Loader2, Search, ArrowLeft, Film, Calendar, Clock, FolderOpen,
 } from 'lucide-react';
 import {
   fetchAllSeriesAdmin, fetchEpisodesWithVideoAdmin,
-  updateEpisode, deleteEpisode,
+  updateEpisode, deleteEpisode, deleteSeries,
 } from '@/lib/admin';
 import { formatViews, formatDate } from '@/lib/utils';
 import type { Series, EpisodeWithVideo } from '@/types';
 import { EpisodeForm } from './EpisodeForm';
+import { SeriesForm } from './SeriesForm';
 
 export function SeriesManagement() {
   const [seriesList, setSeriesList] = useState<Series[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [openSeries, setOpenSeries] = useState<Series | null>(null);
-
-  useEffect(() => {
-    load();
-  }, []);
+  const [showCreate, setShowCreate] = useState(false);
+  const [editingSeries, setEditingSeries] = useState<Series | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -34,9 +33,23 @@ export function SeriesManagement() {
     }
   };
 
+  useEffect(() => {
+    load();
+  }, []);
+
   const filtered = seriesList.filter((s) =>
     !search || s.name.toLowerCase().includes(search.toLowerCase())
   );
+
+  const handleDeleteSeries = async (s: Series) => {
+    if (!confirm(`Delete "${s.name}" and ALL its episodes? This cannot be undone.`)) return;
+    try {
+      await deleteSeries(s.id);
+      setSeriesList((prev) => prev.filter((x) => x.id !== s.id));
+    } catch {
+      // ignore
+    }
+  };
 
   if (loading) {
     return (
@@ -51,73 +64,121 @@ export function SeriesManagement() {
       <SeriesDetail
         series={openSeries}
         onBack={() => { setOpenSeries(null); load(); }}
+        onEditSeries={(s) => setEditingSeries(s)}
       />
     );
   }
 
   return (
     <div>
-      <div className="mb-4 flex items-center gap-2 rounded-lg border border-ink-border bg-ink-card px-3">
-        <Search className="h-4 w-4 text-neutral-500" />
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search series..."
-          className="bg-transparent py-2 text-sm text-white placeholder-neutral-500 focus:outline-none"
-        />
+      <div className="mb-4 flex items-center gap-3">
+        <div className="flex flex-1 items-center gap-2 rounded-lg border border-ink-border bg-ink-card px-3">
+          <Search className="h-4 w-4 text-neutral-500" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search series..."
+            className="bg-transparent py-2 text-sm text-white placeholder-neutral-500 focus:outline-none"
+          />
+        </div>
+        <button onClick={() => setShowCreate(true)} className="btn-primary shrink-0">
+          <Plus className="h-5 w-5" /> New Series
+        </button>
       </div>
 
       {filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <Tv className="mb-4 h-12 w-12 text-neutral-700" />
-          <p className="text-neutral-400">No series found. Create one from the Upload tab (select "Series Episode").</p>
+          <p className="text-neutral-400">No series yet. Click "New Series" to create one.</p>
         </div>
       ) : (
         <div className="space-y-2">
           {filtered.map((s, i) => (
-            <motion.button
+            <motion.div
               key={s.id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: Math.min(i * 0.03, 0.3) }}
-              onClick={() => setOpenSeries(s)}
-              className="flex w-full items-center gap-4 rounded-xl border border-ink-border bg-ink-card p-3 text-left transition-colors hover:bg-ink-soft"
+              className="group flex items-center gap-4 rounded-xl border border-ink-border bg-ink-card p-3 transition-colors hover:bg-ink-soft"
             >
-              <div className="h-16 w-12 shrink-0 overflow-hidden rounded-lg bg-ink-border">
-                {s.poster_url ? (
-                  <img src={s.poster_url} alt="" className="h-full w-full object-cover" />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center">
-                    <Tv className="h-5 w-5 text-neutral-600" />
-                  </div>
-                )}
-              </div>
-              <div className="min-w-0 flex-1">
-                <h3 className="line-clamp-1 font-semibold text-white">{s.name}</h3>
-                <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-neutral-400">
-                  {s.genre && <span>{s.genre}</span>}
-                  {s.year && <span>{s.year}</span>}
-                  <span className="rounded bg-ink-border px-1.5 py-0.5 uppercase">{s.publish_status}</span>
+              <button
+                onClick={() => setOpenSeries(s)}
+                className="flex min-w-0 flex-1 items-center gap-4 text-left"
+              >
+                <div className="h-16 w-12 shrink-0 overflow-hidden rounded-lg bg-ink-border">
+                  {s.poster_url ? (
+                    <img src={s.poster_url} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center">
+                      <Tv className="h-5 w-5 text-neutral-600" />
+                    </div>
+                  )}
                 </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="line-clamp-1 font-semibold text-white">{s.name}</h3>
+                  <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-neutral-400">
+                    {s.genre && <span>{s.genre}</span>}
+                    {s.year && <span>· {s.year}</span>}
+                    <span className="rounded bg-ink-border px-1.5 py-0.5 uppercase">{s.publish_status}</span>
+                  </div>
+                </div>
+                <FolderOpen className="h-5 w-5 text-neutral-500 transition-colors group-hover:text-primary" />
+              </button>
+
+              <div className="flex shrink-0 items-center gap-1">
+                <button
+                  onClick={() => setEditingSeries(s)}
+                  className="grid h-8 w-8 place-items-center rounded-lg text-neutral-400 hover:bg-white/10 hover:text-white"
+                  title="Edit series"
+                >
+                  <Pencil className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => handleDeleteSeries(s)}
+                  className="grid h-8 w-8 place-items-center rounded-lg text-error hover:bg-error/10"
+                  title="Delete series"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
               </div>
-              <ChevronRight className="h-5 w-5 text-neutral-500" />
-            </motion.button>
+            </motion.div>
           ))}
         </div>
       )}
+
+      <AnimatePresence>
+        {showCreate && (
+          <SeriesForm
+            onClose={() => setShowCreate(false)}
+            onSaved={() => { setShowCreate(false); load(); }}
+          />
+        )}
+        {editingSeries && (
+          <SeriesForm
+            series={editingSeries}
+            onClose={() => setEditingSeries(null)}
+            onSaved={() => { setEditingSeries(null); load(); }}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
 
-// ============================================================
-// Series detail — seasons + episodes
-// ============================================================
-
-function SeriesDetail({ series, onBack }: { series: Series; onBack: () => void }) {
+function SeriesDetail({
+  series,
+  onBack,
+  onEditSeries,
+}: {
+  series: Series;
+  onBack: () => void;
+  onEditSeries: (s: Series) => void;
+}) {
   const [episodes, setEpisodes] = useState<EpisodeWithVideo[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
   const [editing, setEditing] = useState<EpisodeWithVideo | null>(null);
+  const [filterSeason, setFilterSeason] = useState<number | 'all'>('all');
 
   const load = async () => {
     setLoading(true);
@@ -136,7 +197,6 @@ function SeriesDetail({ series, onBack }: { series: Series; onBack: () => void }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [series.id]);
 
-  // Group episodes by season
   const seasons = useMemo(() => {
     const map = new Map<number, EpisodeWithVideo[]>();
     for (const ep of episodes) {
@@ -145,6 +205,11 @@ function SeriesDetail({ series, onBack }: { series: Series; onBack: () => void }
     }
     return Array.from(map.entries()).sort((a, b) => a[0] - b[0]);
   }, [episodes]);
+
+  const filteredSeasons = useMemo(() => {
+    if (filterSeason === 'all') return seasons;
+    return seasons.filter(([s]) => s === filterSeason);
+  }, [seasons, filterSeason]);
 
   const handleDelete = async (ep: EpisodeWithVideo) => {
     if (!confirm(`Delete "${ep.title || `Episode ${ep.episode_number}`}"? This removes the episode and its video file.`)) return;
@@ -174,7 +239,6 @@ function SeriesDetail({ series, onBack }: { series: Series; onBack: () => void }
         <ArrowLeft className="h-4 w-4" /> Back to series list
       </button>
 
-      {/* Series header */}
       <div className="mb-6 flex flex-col gap-4 rounded-xl border border-ink-border bg-ink-card p-4 sm:flex-row sm:items-center">
         <div className="h-24 w-16 shrink-0 overflow-hidden rounded-lg bg-ink-border">
           {series.poster_url ? (
@@ -191,13 +255,44 @@ function SeriesDetail({ series, onBack }: { series: Series; onBack: () => void }
           <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-neutral-400">
             {series.genre && <span>{series.genre}</span>}
             {series.year && <span>· {series.year}</span>}
+            {series.language && <span>· {series.language}</span>}
             <span className="rounded bg-ink-border px-1.5 py-0.5 uppercase">{series.publish_status}</span>
           </div>
         </div>
-        <button onClick={() => setShowAdd(true)} className="btn-primary shrink-0">
-          <Plus className="h-5 w-5" /> Add Episode
-        </button>
+        <div className="flex shrink-0 gap-2">
+          <button onClick={() => onEditSeries(series)} className="btn-ghost">
+            <Pencil className="h-4 w-4" /> Edit
+          </button>
+          <button onClick={() => setShowAdd(true)} className="btn-primary">
+            <Plus className="h-5 w-5" /> Add Episode
+          </button>
+        </div>
       </div>
+
+      {seasons.length > 1 && (
+        <div className="mb-4 flex items-center gap-2">
+          <span className="text-sm text-neutral-400">Filter:</span>
+          <button
+            onClick={() => setFilterSeason('all')}
+            className={`rounded-lg px-3 py-1.5 text-sm transition-colors ${
+              filterSeason === 'all' ? 'bg-primary text-white' : 'bg-white/5 text-neutral-400 hover:bg-white/10'
+            }`}
+          >
+            All
+          </button>
+          {seasons.map(([s]) => (
+            <button
+              key={s}
+              onClick={() => setFilterSeason(s)}
+              className={`rounded-lg px-3 py-1.5 text-sm transition-colors ${
+                filterSeason === s ? 'bg-primary text-white' : 'bg-white/5 text-neutral-400 hover:bg-white/10'
+              }`}
+            >
+              Season {s}
+            </button>
+          ))}
+        </div>
+      )}
 
       {loading ? (
         <div className="flex items-center justify-center py-12">
@@ -210,7 +305,7 @@ function SeriesDetail({ series, onBack }: { series: Series; onBack: () => void }
         </div>
       ) : (
         <div className="space-y-6">
-          {seasons.map(([season, eps]) => (
+          {filteredSeasons.map(([season, eps]) => (
             <div key={season}>
               <h3 className="mb-2 flex items-center gap-2 font-display text-xl tracking-wide text-white">
                 Season {season}
@@ -225,7 +320,6 @@ function SeriesDetail({ series, onBack }: { series: Series; onBack: () => void }
                     transition={{ delay: Math.min(i * 0.03, 0.3) }}
                     className="flex items-center gap-4 rounded-xl border border-ink-border bg-ink-card p-3"
                   >
-                    {/* Thumbnail */}
                     <div className="relative h-16 w-28 shrink-0 overflow-hidden rounded-lg bg-ink-border">
                       {ep.thumbnail_url ? (
                         <img src={ep.thumbnail_url} alt="" className="h-full w-full object-cover" />
@@ -241,7 +335,6 @@ function SeriesDetail({ series, onBack }: { series: Series; onBack: () => void }
                       </span>
                     </div>
 
-                    {/* Info */}
                     <div className="min-w-0 flex-1">
                       <h4 className="line-clamp-1 font-semibold text-white">
                         {ep.title || `Episode ${ep.episode_number}`}
@@ -265,7 +358,6 @@ function SeriesDetail({ series, onBack }: { series: Series; onBack: () => void }
                       </div>
                     </div>
 
-                    {/* Actions */}
                     <div className="flex shrink-0 items-center gap-1">
                       <button
                         onClick={() => handleTogglePublish(ep)}
@@ -297,7 +389,6 @@ function SeriesDetail({ series, onBack }: { series: Series; onBack: () => void }
         </div>
       )}
 
-      {/* Add / Edit episode modals */}
       <AnimatePresence>
         {showAdd && (
           <EpisodeForm

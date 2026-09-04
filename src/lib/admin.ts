@@ -115,7 +115,7 @@ export async function deleteVideo(id: string): Promise<void> {
   if (error) throw error;
 }
 
-export async function createSeries(input: Omit<Series, 'id' | 'created_at' | 'updated_at' | 'genre' | 'language' | 'year' | 'rating' | 'age_rating' | 'featured' | 'trending' | 'publish_status'> & Partial<Pick<Series, 'genre' | 'language' | 'year' | 'rating' | 'age_rating' | 'featured' | 'trending' | 'publish_status'>>): Promise<Series> {
+export async function createSeries(input: Omit<Series, 'id' | 'created_at' | 'updated_at'>): Promise<Series> {
   const { data, error } = await supabase
     .from('series')
     .insert(input)
@@ -134,6 +134,47 @@ export async function updateSeries(id: string, patch: Partial<Series>): Promise<
     .single();
   if (error) throw error;
   return data as Series;
+}
+
+export async function deleteSeries(id: string): Promise<void> {
+  const { data: episodes } = await supabase
+    .from('episodes')
+    .select('id, video_id, thumbnail_url')
+    .eq('series_id', id);
+
+  if (episodes) {
+    for (const ep of episodes) {
+      if (ep.thumbnail_url) {
+        const path = extractStoragePath(ep.thumbnail_url);
+        if (path) { try { await deleteFile('posters', path); } catch { /* best-effort */ } }
+      }
+      if (ep.video_id) {
+        try { await deleteVideo(ep.video_id); } catch { /* best-effort */ }
+      }
+    }
+  }
+
+  await supabase.from('episodes').delete().eq('series_id', id);
+
+  const { data: series } = await supabase
+    .from('series')
+    .select('poster_url, banner_url')
+    .eq('id', id)
+    .maybeSingle();
+
+  if (series) {
+    if (series.poster_url) {
+      const path = extractStoragePath(series.poster_url);
+      if (path) { try { await deleteFile('posters', path); } catch { /* best-effort */ } }
+    }
+    if (series.banner_url) {
+      const path = extractStoragePath(series.banner_url);
+      if (path) { try { await deleteFile('banners', path); } catch { /* best-effort */ } }
+    }
+  }
+
+  const { error } = await supabase.from('series').delete().eq('id', id);
+  if (error) throw error;
 }
 
 export async function fetchAllSeriesAdmin(): Promise<Series[]> {
