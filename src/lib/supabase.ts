@@ -23,4 +23,5 @@ export const STORAGE_BUCKETS = {
   trailers: 'trailers',
   avatars: 'avatars',
   subtitles: 'subtitles',
+  wallpapers: 'wallpapers',
 } as const;

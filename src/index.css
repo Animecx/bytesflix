@@ -2,6 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --color-primary-rgb: 229 9 20;
+  --color-primary-50-rgb: 255 241 241;
+  --color-primary-100-rgb: 255 223 224;
+  --color-primary-200-rgb: 255 197 199;
+  --color-primary-300-rgb: 255 156 160;
+  --color-primary-400-rgb: 255 99 106;
+  --color-primary-500-rgb: 229 9 20;
+  --color-primary-600-rgb: 196 8 18;
+  --color-primary-700-rgb: 160 7 15;
+  --color-primary-800-rgb: 120 5 11;
+  --color-primary-900-rgb: 82 3 8;
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;
@@ -97,7 +111,7 @@ input[type='range'].player-range::-webkit-slider-thumb {
   height: 14px;
   width: 14px;
   border-radius: 50%;
-  background: #E50914;
+  background: rgb(var(--color-primary-rgb));
   margin-top: -5px;
   box-shadow: 0 0 6px rgba(229, 9, 20, 0.6);
 }
@@ -105,6 +119,6 @@ input[type='range'].player-range::-moz-range-thumb {
   height: 14px;
   width: 14px;
   border-radius: 50%;
-  background: #E50914;
+  background: rgb(var(--color-primary-rgb));
   border: none;
 }

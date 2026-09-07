@@ -1,16 +1,17 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Film, Users, Eye, HardDrive, TrendingUp, Clock, UploadCloud, ListVideo, Settings, Users as UsersIcon, CheckCircle, File as FileEdit, EyeOff, Tv } from 'lucide-react';
+import { Film, Users, Eye, HardDrive, TrendingUp, Clock, UploadCloud, ListVideo, Settings, Users as UsersIcon, CheckCircle, File as FileEdit, EyeOff, Tv, Palette } from 'lucide-react';
 import { fetchAdminStats } from '@/lib/admin';
 import { formatViews, formatDate } from '@/lib/utils';
 import { UploadForm } from '@/components/admin/UploadForm';
 import { VideoManagement } from '@/components/admin/VideoManagement';
 import { SeriesManagement } from '@/components/admin/SeriesManagement';
 import { SettingsPanel } from '@/components/admin/SettingsPanel';
+import { AppearancePanel } from '@/components/admin/AppearancePanel';
 import { UserManagement } from '@/components/admin/UserManagement';
 import type { AdminStats } from '@/lib/admin';
 
-type Tab = 'overview' | 'upload' | 'videos' | 'series' | 'users' | 'settings';
+type Tab = 'overview' | 'upload' | 'videos' | 'series' | 'users' | 'appearance' | 'settings';
 
 const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: 'overview', label: 'Overview', icon: <TrendingUp className="h-4 w-4" /> },
@@ -18,6 +19,7 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: 'videos', label: 'Videos', icon: <ListVideo className="h-4 w-4" /> },
   { id: 'series', label: 'Series', icon: <Tv className="h-4 w-4" /> },
   { id: 'users', label: 'Users', icon: <UsersIcon className="h-4 w-4" /> },
+  { id: 'appearance', label: 'Appearance', icon: <Palette className="h-4 w-4" /> },
   { id: 'settings', label: 'Settings', icon: <Settings className="h-4 w-4" /> },
 ];
 
@@ -74,6 +76,7 @@ export default function AdminDashboard() {
         {tab === 'videos' && <VideoManagement />}
         {tab === 'series' && <SeriesManagement />}
         {tab === 'users' && <UserManagement />}
+        {tab === 'appearance' && <AppearancePanel />}
         {tab === 'settings' && <SettingsPanel />}
       </div>
     </div>

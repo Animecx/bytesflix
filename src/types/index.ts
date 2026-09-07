@@ -122,4 +122,27 @@ export interface SiteSettings {
   accent_color: string;
   maintenance_mode: boolean;
   updated_at: string;
+  wallpaper_url: string | null;
+  wallpaper_enabled: boolean;
+  wallpaper_opacity: number;
+  wallpaper_position: string;
+  wallpaper_size: string;
+  popups_enabled: boolean;
+}
+
+export type PopupFrequency = 'once' | 'session' | 'always';
+
+export interface Popup {
+  id: string;
+  title: string;
+  message: string | null;
+  image_url: string | null;
+  button_text: string | null;
+  button_url: string | null;
+  is_enabled: boolean;
+  display_frequency: PopupFrequency;
+  start_date: string | null;
+  end_date: string | null;
+  created_at: string;
+  updated_at: string;
 }

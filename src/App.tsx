@@ -6,6 +6,8 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { ProtectedRoute, AdminRoute } from '@/components/ProtectedRoute';
 import { SkeletonHero } from '@/components/Skeletons';
+import { WallpaperBackground } from '@/components/WallpaperBackground';
+import { PopupDisplay } from '@/components/PopupDisplay';
 
 const Home = lazy(() => import('@/pages/Home'));
 const Movies = lazy(() => import('@/pages/Movies'));
@@ -37,6 +39,7 @@ function App() {
   return (
     <SettingsProvider>
       <AuthProvider>
+        <WallpaperBackground />
         <div className="flex min-h-screen flex-col bg-ink">
           <Navbar />
           <main className="flex-1">
@@ -92,6 +95,7 @@ function App() {
           </main>
           <Footer />
         </div>
+        <PopupDisplay />
       </AuthProvider>
     </SettingsProvider>
   );

@@ -5,17 +5,17 @@ export default {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#E50914',
-          50: '#FFF1F1',
-          100: '#FFDFE0',
-          200: '#FFC5C7',
-          300: '#FF9CA0',
-          400: '#FF636A',
-          500: '#E50914',
-          600: '#C40812',
-          700: '#A0070F',
-          800: '#78050B',
-          900: '#520308',
+          DEFAULT: 'rgb(var(--color-primary-rgb) / <alpha-value>)',
+          50: 'rgb(var(--color-primary-50-rgb) / <alpha-value>)',
+          100: 'rgb(var(--color-primary-100-rgb) / <alpha-value>)',
+          200: 'rgb(var(--color-primary-200-rgb) / <alpha-value>)',
+          300: 'rgb(var(--color-primary-300-rgb) / <alpha-value>)',
+          400: 'rgb(var(--color-primary-400-rgb) / <alpha-value>)',
+          500: 'rgb(var(--color-primary-500-rgb) / <alpha-value>)',
+          600: 'rgb(var(--color-primary-600-rgb) / <alpha-value>)',
+          700: 'rgb(var(--color-primary-700-rgb) / <alpha-value>)',
+          800: 'rgb(var(--color-primary-800-rgb) / <alpha-value>)',
+          900: 'rgb(var(--color-primary-900-rgb) / <alpha-value>)',
         },
         secondary: {
           DEFAULT: '#FFB400',
