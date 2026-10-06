@@ -117,7 +117,7 @@ function isHlsUrl(url: string): boolean {
 }
 
 function isDirectVideoUrl(url: string): boolean {
-  return /\.(mp4|webm)(\?.*)?$/i.test(url);
+  return /\.(mp4|webm|ogg|ogv|mov|mkv|avi|m4v)(\?.*)?$/i.test(url);
 }
 
 function isEmbeddableUrl(url: string): boolean {
@@ -184,7 +184,7 @@ export function getVideoSourceInfo(url: string): VideoSourceInfo {
 
 export function isEmbeddableProvider(url: string): boolean {
   const p = detectVideoProvider(url);
-  return ['youtube', 'vimeo', 'dailymotion', 'streamable', 'loom', 'wistia', 'screenapp', 'generic'].includes(p);
+  return ['youtube', 'vimeo', 'dailymotion', 'streamable', 'loom', 'wistia', 'screenapp'].includes(p);
 }
 
 export function isExternalVideoUrl(url: string): boolean {
