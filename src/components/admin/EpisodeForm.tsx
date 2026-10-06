@@ -32,6 +32,7 @@ export function EpisodeForm({ series, existingEpisodes, episode, onClose, onSave
   const [duration, setDuration] = useState<number | ''>(episode?.duration_minutes ?? episode?.video?.duration_minutes ?? '');
   const [status, setStatus] = useState<VideoStatus>(episode?.publish_status ?? 'published');
   const [featured, setFeatured] = useState(episode?.featured ?? false);
+  const [downloadEnabled, setDownloadEnabled] = useState(episode?.download_enabled ?? false);
 
   // Thumbnail
   const [thumbSlot, setThumbSlot] = useState<{ file: File | null; previewUrl: string | null }>({
@@ -101,6 +102,7 @@ export function EpisodeForm({ series, existingEpisodes, episode, onClose, onSave
           duration_minutes: typeof duration === 'number' ? duration : null,
           status,
           featured,
+          download_enabled: downloadEnabled,
         };
 
         if (thumbUrl) videoPatch.poster_url = thumbUrl;
@@ -125,6 +127,7 @@ export function EpisodeForm({ series, existingEpisodes, episode, onClose, onSave
           duration_minutes: typeof duration === 'number' ? duration : null,
           publish_status: status,
           featured,
+          download_enabled: downloadEnabled,
         });
       } else {
         // Create new: upload video, create video row, create episode row
@@ -157,6 +160,7 @@ export function EpisodeForm({ series, existingEpisodes, episode, onClose, onSave
           trending: false,
           status,
           tags: [],
+          download_enabled: downloadEnabled,
         });
 
         await createEpisode({
@@ -352,6 +356,11 @@ export function EpisodeForm({ series, existingEpisodes, episode, onClose, onSave
             <span className="text-sm text-neutral-300">Featured Episode</span>
           </label>
         </div>
+
+        <label className="flex cursor-pointer items-center gap-3">
+          <input type="checkbox" checked={downloadEnabled} onChange={(e) => setDownloadEnabled(e.target.checked)} className="h-5 w-5 rounded accent-primary" />
+          <span className="text-sm text-neutral-300">Allow Download — only if BytesFlix is authorized to distribute this file</span>
+        </label>
 
         {/* Actions */}
         <div className="flex gap-3 pt-2">

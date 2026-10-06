@@ -27,6 +27,7 @@ export function UploadForm({ onUploaded }: UploadFormProps) {
   const [featured, setFeatured] = useState(false);
   const [trending, setTrending] = useState(false);
   const [status, setStatus] = useState<VideoStatus>('published');
+  const [downloadEnabled, setDownloadEnabled] = useState(false);
   const [tags, setTags] = useState('');
 
   const [posterSlot, setPosterSlot] = useState<FileSlot>({ file: null, previewUrl: null });
@@ -56,6 +57,7 @@ export function UploadForm({ onUploaded }: UploadFormProps) {
     setFeatured(false);
     setTrending(false);
     setStatus('published');
+    setDownloadEnabled(false);
     setTags('');
     setPosterSlot({ file: null, previewUrl: null });
     setBannerSlot({ file: null, previewUrl: null });
@@ -136,6 +138,7 @@ export function UploadForm({ onUploaded }: UploadFormProps) {
         trending,
         status,
         tags: tagArray,
+        download_enabled: downloadEnabled,
       });
 
       setSuccess(true);
@@ -328,6 +331,11 @@ export function UploadForm({ onUploaded }: UploadFormProps) {
             <span className="text-sm text-neutral-300">Trending</span>
           </label>
         </div>
+
+        <label className="flex cursor-pointer items-center gap-3">
+          <input type="checkbox" checked={downloadEnabled} onChange={(e) => setDownloadEnabled(e.target.checked)} className="h-5 w-5 rounded accent-primary" />
+          <span className="text-sm text-neutral-300">Allow Download — enable this only if BytesFlix is authorized to distribute this video file</span>
+        </label>
 
         {uploading && (
           <div className="rounded-lg border border-ink-border bg-ink-soft p-4">

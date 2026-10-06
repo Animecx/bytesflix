@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { VideoPlayer } from '@/components/VideoPlayer';
 import { VideoCard } from '@/components/VideoCard';
+import { DownloadButton } from '@/components/DownloadButton';
 import {
   fetchVideoById, fetchRelatedVideos, fetchEpisodesBySeries,
   incrementViews,
@@ -248,6 +249,11 @@ export default function Watch() {
                     {isFav ? 'In My List' : 'Add to My List'}
                   </button>
                 )}
+                <DownloadButton
+                  url={video.video_url}
+                  downloadEnabled={video.download_enabled}
+                  filename={video.title.replace(/[^a-zA-Z0-9_-]/g, '_')}
+                />
               </div>
             </motion.div>
           </div>

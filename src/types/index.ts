@@ -48,6 +48,7 @@ export interface Video {
   trending: boolean;
   status: VideoStatus;
   tags: string[] | null;
+  download_enabled: boolean;
   views: number;
   created_at: string;
   updated_at: string;
@@ -65,6 +66,7 @@ export interface Episode {
   duration_minutes: number | null;
   publish_status: VideoStatus;
   featured: boolean;
+  download_enabled: boolean;
   created_at: string;
 }
 

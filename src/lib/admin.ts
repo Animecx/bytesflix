@@ -62,7 +62,7 @@ export async function fetchAllProfiles(): Promise<Profile[]> {
   return (data ?? []) as Profile[];
 }
 
-export async function createVideo(input: Omit<Video, 'id' | 'created_at' | 'updated_at' | 'views' | 'subtitle_url' | 'release_date'> & Partial<Pick<Video, 'subtitle_url' | 'release_date'>>): Promise<Video> {
+export async function createVideo(input: Omit<Video, 'id' | 'created_at' | 'updated_at' | 'views' | 'subtitle_url' | 'release_date' | 'download_enabled'> & Partial<Pick<Video, 'subtitle_url' | 'release_date' | 'download_enabled'>>): Promise<Video> {
   const { data, error } = await supabase
     .from('videos')
     .insert(input)
@@ -197,7 +197,7 @@ export async function fetchEpisodesWithVideoAdmin(seriesId: string): Promise<Epi
   return (data ?? []) as EpisodeWithVideo[];
 }
 
-export async function createEpisode(input: Omit<Episode, 'id' | 'created_at' | 'title' | 'description' | 'thumbnail_url' | 'duration_minutes' | 'publish_status' | 'featured'> & Partial<Pick<Episode, 'title' | 'description' | 'thumbnail_url' | 'duration_minutes' | 'publish_status' | 'featured'>>): Promise<Episode> {
+export async function createEpisode(input: Omit<Episode, 'id' | 'created_at' | 'title' | 'description' | 'thumbnail_url' | 'duration_minutes' | 'publish_status' | 'featured' | 'download_enabled'> & Partial<Pick<Episode, 'title' | 'description' | 'thumbnail_url' | 'duration_minutes' | 'publish_status' | 'featured' | 'download_enabled'>>): Promise<Episode> {
   const { data, error } = await supabase
     .from('episodes')
     .insert(input)

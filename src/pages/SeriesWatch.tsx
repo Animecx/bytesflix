@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { VideoPlayer } from '@/components/VideoPlayer';
 import { EmbedPlayer } from '@/components/EmbedPlayer';
+import { DownloadButton } from '@/components/DownloadButton';
 import {
   fetchSeriesWithEpisodesById, fetchEpisodeById, incrementViews,
 } from '@/lib/videos';
@@ -341,6 +342,16 @@ export default function SeriesWatch() {
                 <button onClick={handleShare} className="btn-ghost">
                   <Share2 className="h-5 w-5" /> Share
                 </button>
+                {video?.video_url && (
+                  <DownloadButton
+                    url={video.video_url}
+                    downloadEnabled={
+                      (currentEpisode?.download_enabled ?? false) ||
+                      (video.download_enabled ?? false)
+                    }
+                    filename={`${series.name.replace(/[^a-zA-Z0-9_-]/g, '_')}_S${currentEpisode?.season_number ?? 1}E${currentEpisode?.episode_number ?? 1}`}
+                  />
+                )}
               </div>
             </motion.div>
           </div>

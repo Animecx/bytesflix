@@ -211,6 +211,7 @@ function EditVideoModal({
   const [featured, setFeatured] = useState(video.featured);
   const [trending, setTrending] = useState(video.trending);
   const [status, setStatus] = useState<VideoStatus>(video.status);
+  const [downloadEnabled, setDownloadEnabled] = useState(video.download_enabled ?? false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -267,6 +268,7 @@ function EditVideoModal({
         featured,
         trending,
         status,
+        download_enabled: downloadEnabled,
       };
 
       // Replace media files if new ones were selected
@@ -375,6 +377,11 @@ function EditVideoModal({
             <span className="text-sm text-neutral-300">Trending</span>
           </label>
         </div>
+
+        <label className="flex cursor-pointer items-center gap-2">
+          <input type="checkbox" checked={downloadEnabled} onChange={(e) => setDownloadEnabled(e.target.checked)} className="h-5 w-5 rounded accent-primary" />
+          <span className="text-sm text-neutral-300">Allow Download — only if BytesFlix is authorized to distribute this file</span>
+        </label>
 
         {/* Media replacement section */}
         <div className="mt-6 border-t border-ink-border pt-4">
