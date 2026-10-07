@@ -16,7 +16,7 @@ import {
   addToWatchHistory, toggleFavorite, isFavorite,
 } from '@/lib/userData';
 import { useAuth } from '@/context/AuthContext';
-import { formatDuration, formatViews, formatDate, detectVideoProvider, getVideoSourceInfo } from '@/lib/utils';
+import { formatDuration, formatViews, formatDate, detectVideoProvider } from '@/lib/utils';
 import type { SeriesWithEpisodes, EpisodeWithVideo } from '@/types';
 
 export default function SeriesWatch() {
@@ -221,8 +221,23 @@ export default function SeriesWatch() {
         {currentEpisode && hasVideo ? (
           (() => {
             const provider = detectVideoProvider(video!.video_url!);
-            const sourceInfo = getVideoSourceInfo(video!.video_url!);
-            if (sourceInfo.embedUrl && provider !== 'direct' && provider !== 'hls') {
+            if (provider === 'direct' || provider === 'hls') {
+              return (
+                <VideoPlayer
+                  key={currentEpisode.id}
+                  src={video!.video_url!}
+                  poster={currentEpisode.thumbnail_url ?? video!.poster_url ?? undefined}
+                  initialPosition={resumePosition}
+                  onProgress={handleProgress}
+                  onEnded={handleEnded}
+                  autoPlay
+                  nextEpisodeLabel={autoNext && nextEpisode ? `Next: S${nextEpisode.season_number} E${nextEpisode.episode_number}` : undefined}
+                  onNextEpisode={nextEpisode ? () => goToEpisode(nextEpisode) : undefined}
+                  subtitleUrl={video!.subtitle_url ?? undefined}
+                />
+              );
+            }
+            if (provider !== 'unknown') {
               return <EmbedPlayer url={video!.video_url!} title={`${series.name} - ${currentEpisode.title ?? `S${currentEpisode.season_number}E${currentEpisode.episode_number}`}`} autoPlay />;
             }
             return (
