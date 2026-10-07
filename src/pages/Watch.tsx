@@ -17,7 +17,7 @@ import {
   addToWatchHistory, toggleFavorite, isFavorite,
 } from '@/lib/userData';
 import { useAuth } from '@/context/AuthContext';
-import { formatDuration, formatViews, formatDate, isEmbeddableProvider } from '@/lib/utils';
+import { formatDuration, formatViews, formatDate, detectVideoProvider, getVideoSourceInfo } from '@/lib/utils';
 import type { Video, Episode } from '@/types';
 import { EmbedPlayer } from '@/components/EmbedPlayer';
 
@@ -165,11 +165,9 @@ export default function Watch() {
       {/* Player */}
       <div className="mx-auto max-w-6xl px-4 pt-4 sm:px-6">
         {(() => {
-          // Use the native video player for direct files, HLS streams, and
-          // generic/unrecognized URLs — those are served as raw video and
-          // would be blocked if loaded in an iframe (e.g. "refused to connect").
-          // Only route to EmbedPlayer for known embed providers (YouTube, Vimeo, etc).
-          if (isEmbeddableProvider(video.video_url)) {
+          const provider = detectVideoProvider(video.video_url);
+          const sourceInfo = getVideoSourceInfo(video.video_url);
+          if (sourceInfo.embedUrl && provider !== 'direct' && provider !== 'hls') {
             return <EmbedPlayer url={video.video_url} title={video.title} autoPlay />;
           }
           return (
