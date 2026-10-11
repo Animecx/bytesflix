@@ -5,9 +5,8 @@ import {
   Star, Clock, Calendar, Globe, Tag, AlertCircle, Loader2,
   Play, ChevronRight, Bookmark, Check,
 } from 'lucide-react';
-import { VideoPlayer } from '@/components/VideoPlayer';
 import { VideoCard } from '@/components/VideoCard';
-import { DownloadButton } from '@/components/DownloadButton';
+import { UnifiedPlayer } from '@/components/UnifiedPlayer';
 import {
   fetchVideoById, fetchRelatedVideos, fetchEpisodesBySeries,
   incrementViews,
@@ -17,9 +16,8 @@ import {
   addToWatchHistory, toggleFavorite, isFavorite,
 } from '@/lib/userData';
 import { useAuth } from '@/context/AuthContext';
-import { formatDuration, formatViews, formatDate, detectVideoProvider, getVideoSourceInfo } from '@/lib/utils';
+import { formatDuration, formatViews, formatDate } from '@/lib/utils';
 import type { Video, Episode } from '@/types';
-import { EmbedPlayer } from '@/components/EmbedPlayer';
 
 export default function Watch() {
   const { id } = useParams<{ id: string }>();
@@ -164,40 +162,17 @@ export default function Watch() {
     <div className="pt-16">
       {/* Player */}
       <div className="mx-auto max-w-6xl px-4 pt-4 sm:px-6">
-        {(() => {
-          const provider = detectVideoProvider(video.video_url);
-          if (provider === 'direct' || provider === 'hls') {
-            return (
-              <VideoPlayer
-                key={video.id}
-                src={video.video_url}
-                poster={video.poster_url ?? undefined}
-                initialPosition={resumePosition}
-                onProgress={handleProgress}
-                onEnded={handleEnded}
-                autoPlay
-                nextEpisodeLabel={nextEpisodeLabel}
-                onNextEpisode={nextEpisodeLabel ? handleNextEpisode : undefined}
-              />
-            );
-          }
-          if (provider !== 'unknown') {
-            return <EmbedPlayer url={video.video_url} title={video.title} autoPlay />;
-          }
-          return (
-            <VideoPlayer
-              key={video.id}
-              src={video.video_url}
-              poster={video.poster_url ?? undefined}
-              initialPosition={resumePosition}
-              onProgress={handleProgress}
-              onEnded={handleEnded}
-              autoPlay
-              nextEpisodeLabel={nextEpisodeLabel}
-              onNextEpisode={nextEpisodeLabel ? handleNextEpisode : undefined}
-            />
-          );
-        })()}
+        <UnifiedPlayer
+          url={video.video_url}
+          title={video.title}
+          poster={video.poster_url ?? undefined}
+          autoPlay
+          initialPosition={resumePosition}
+          onProgress={handleProgress}
+          onEnded={handleEnded}
+          nextEpisodeLabel={nextEpisodeLabel}
+          onNextEpisode={nextEpisodeLabel ? handleNextEpisode : undefined}
+        />
       </div>
 
       {/* Details */}
@@ -249,11 +224,7 @@ export default function Watch() {
                     {isFav ? 'In My List' : 'Add to My List'}
                   </button>
                 )}
-                <DownloadButton
-                  url={video.video_url}
-                  downloadEnabled={video.download_enabled}
-                  filename={video.title.replace(/[^a-zA-Z0-9_-]/g, '_')}
-                />
+
               </div>
             </motion.div>
           </div>

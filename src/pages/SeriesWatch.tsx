@@ -5,9 +5,7 @@ import {
   Tv, AlertCircle, Loader2, Play, ChevronLeft, ChevronRight,
   Star, Calendar, Clock, Globe, Bookmark, Check, Share2, ListVideo,
 } from 'lucide-react';
-import { VideoPlayer } from '@/components/VideoPlayer';
-import { EmbedPlayer } from '@/components/EmbedPlayer';
-import { DownloadButton } from '@/components/DownloadButton';
+import { UnifiedPlayer } from '@/components/UnifiedPlayer';
 import {
   fetchSeriesWithEpisodesById, fetchEpisodeById, incrementViews,
 } from '@/lib/videos';
@@ -16,7 +14,7 @@ import {
   addToWatchHistory, toggleFavorite, isFavorite,
 } from '@/lib/userData';
 import { useAuth } from '@/context/AuthContext';
-import { formatDuration, formatViews, formatDate, detectVideoProvider } from '@/lib/utils';
+import { formatDuration, formatViews, formatDate } from '@/lib/utils';
 import type { SeriesWithEpisodes, EpisodeWithVideo } from '@/types';
 
 export default function SeriesWatch() {
@@ -219,42 +217,18 @@ export default function SeriesWatch() {
       {/* Player */}
       <div className="mx-auto max-w-6xl px-4 pt-4 sm:px-6">
         {currentEpisode && hasVideo ? (
-          (() => {
-            const provider = detectVideoProvider(video!.video_url!);
-            if (provider === 'direct' || provider === 'hls') {
-              return (
-                <VideoPlayer
-                  key={currentEpisode.id}
-                  src={video!.video_url!}
-                  poster={currentEpisode.thumbnail_url ?? video!.poster_url ?? undefined}
-                  initialPosition={resumePosition}
-                  onProgress={handleProgress}
-                  onEnded={handleEnded}
-                  autoPlay
-                  nextEpisodeLabel={autoNext && nextEpisode ? `Next: S${nextEpisode.season_number} E${nextEpisode.episode_number}` : undefined}
-                  onNextEpisode={nextEpisode ? () => goToEpisode(nextEpisode) : undefined}
-                  subtitleUrl={video!.subtitle_url ?? undefined}
-                />
-              );
-            }
-            if (provider !== 'unknown') {
-              return <EmbedPlayer url={video!.video_url!} title={`${series.name} - ${currentEpisode.title ?? `S${currentEpisode.season_number}E${currentEpisode.episode_number}`}`} autoPlay />;
-            }
-            return (
-              <VideoPlayer
-                key={currentEpisode.id}
-                src={video!.video_url!}
-                poster={currentEpisode.thumbnail_url ?? video!.poster_url ?? undefined}
-                initialPosition={resumePosition}
-                onProgress={handleProgress}
-                onEnded={handleEnded}
-                autoPlay
-                nextEpisodeLabel={autoNext && nextEpisode ? `Next: S${nextEpisode.season_number} E${nextEpisode.episode_number}` : undefined}
-                onNextEpisode={nextEpisode ? () => goToEpisode(nextEpisode) : undefined}
-                subtitleUrl={video!.subtitle_url ?? undefined}
-              />
-            );
-          })()
+          <UnifiedPlayer
+            url={video!.video_url!}
+            title={`${series.name} - ${currentEpisode.title ?? `S${currentEpisode.season_number}E${currentEpisode.episode_number}`}`}
+            poster={currentEpisode.thumbnail_url ?? video!.poster_url ?? undefined}
+            autoPlay
+            initialPosition={resumePosition}
+            onProgress={handleProgress}
+            onEnded={handleEnded}
+            nextEpisodeLabel={autoNext && nextEpisode ? `Next: S${nextEpisode.season_number} E${nextEpisode.episode_number}` : undefined}
+            onNextEpisode={nextEpisode ? () => goToEpisode(nextEpisode) : undefined}
+            subtitleUrl={video!.subtitle_url ?? undefined}
+          />
         ) : (
           <div className="flex aspect-video w-full items-center justify-center rounded-xl bg-ink-card">
             <div className="text-center">
@@ -342,16 +316,6 @@ export default function SeriesWatch() {
                 <button onClick={handleShare} className="btn-ghost">
                   <Share2 className="h-5 w-5" /> Share
                 </button>
-                {video?.video_url && (
-                  <DownloadButton
-                    url={video.video_url}
-                    downloadEnabled={
-                      (currentEpisode?.download_enabled ?? false) ||
-                      (video.download_enabled ?? false)
-                    }
-                    filename={`${series.name.replace(/[^a-zA-Z0-9_-]/g, '_')}_S${currentEpisode?.season_number ?? 1}E${currentEpisode?.episode_number ?? 1}`}
-                  />
-                )}
               </div>
             </motion.div>
           </div>

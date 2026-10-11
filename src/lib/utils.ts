@@ -117,7 +117,7 @@ function isHlsUrl(url: string): boolean {
 }
 
 function isDirectVideoUrl(url: string): boolean {
-  return /\.(mp4|webm)(\?.*)?$/i.test(url);
+  return /\.(mp4|webm|ogg|ogv)(\?.*)?$/i.test(url);
 }
 
 function isEmbeddableUrl(url: string): boolean {
@@ -180,20 +180,6 @@ export function getVideoSourceInfo(url: string): VideoSourceInfo {
     default:
       return { provider, id: null, embedUrl: null };
   }
-}
-
-export function isEmbeddableProvider(url: string): boolean {
-  const p = detectVideoProvider(url);
-  return ['youtube', 'vimeo', 'dailymotion', 'streamable', 'loom', 'wistia', 'screenapp', 'generic'].includes(p);
-}
-
-export function isExternalVideoUrl(url: string): boolean {
-  return detectVideoProvider(url) !== 'unknown';
-}
-
-export function isHtml5VideoUrl(url: string): boolean {
-  const p = detectVideoProvider(url);
-  return p === 'direct' || p === 'hls';
 }
 
 export function extractErrorMessage(err: unknown, fallback: string): string {
