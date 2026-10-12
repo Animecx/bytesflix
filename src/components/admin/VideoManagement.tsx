@@ -267,7 +267,6 @@ function EditVideoModal({
         featured,
         trending,
         status,
-        download_enabled: false,
       };
 
       // Replace media files if new ones were selected

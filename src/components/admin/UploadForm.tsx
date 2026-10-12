@@ -136,7 +136,6 @@ export function UploadForm({ onUploaded }: UploadFormProps) {
         trending,
         status,
         tags: tagArray,
-        download_enabled: false,
       });
 
       setSuccess(true);

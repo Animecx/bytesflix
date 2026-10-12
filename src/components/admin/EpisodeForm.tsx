@@ -101,7 +101,6 @@ export function EpisodeForm({ series, existingEpisodes, episode, onClose, onSave
           duration_minutes: typeof duration === 'number' ? duration : null,
           status,
           featured,
-          download_enabled: false,
         };
 
         if (thumbUrl) videoPatch.poster_url = thumbUrl;
@@ -126,7 +125,6 @@ export function EpisodeForm({ series, existingEpisodes, episode, onClose, onSave
           duration_minutes: typeof duration === 'number' ? duration : null,
           publish_status: status,
           featured,
-          download_enabled: false,
         });
       } else {
         // Create new: upload video, create video row, create episode row
@@ -159,7 +157,6 @@ export function EpisodeForm({ series, existingEpisodes, episode, onClose, onSave
           trending: false,
           status,
           tags: [],
-          download_enabled: false,
         });
 
         await createEpisode({
