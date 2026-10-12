@@ -8,16 +8,6 @@ interface EmbedPlayerProps {
   autoPlay?: boolean;
 }
 
-const KNOWN_PROVIDERS: VideoProvider[] = [
-  'youtube',
-  'vimeo',
-  'dailymotion',
-  'streamable',
-  'loom',
-  'wistia',
-  'screenapp',
-];
-
 function buildEmbedSrc(provider: VideoProvider, embedUrl: string, autoPlay: boolean): string {
   if (!autoPlay) return embedUrl;
   if (provider === 'youtube') return embedUrl + (embedUrl.includes('?') ? '&' : '?') + 'autoplay=1&rel=0';
@@ -52,7 +42,6 @@ export function EmbedPlayer({ url, title, autoPlay = false }: EmbedPlayerProps) 
 
   if (!info.embedUrl) return null;
 
-  const isKnown = KNOWN_PROVIDERS.includes(info.provider);
   const src = buildEmbedSrc(info.provider, info.embedUrl, autoPlay);
 
   const allow = [
@@ -106,7 +95,7 @@ export function EmbedPlayer({ url, title, autoPlay = false }: EmbedPlayerProps) 
         allow={allow}
         allowFullScreen
         onLoad={handleLoad}
-        referrerPolicy={isKnown ? 'strict-origin-when-cross-origin' : 'no-referrer'}
+        referrerPolicy="no-referrer"
       />
     </div>
   );
