@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Loader2, UploadCloud, Check, X, Link2 } from 'lucide-react';
 import { FileUpload } from '@/components/FileUpload';
-import { detectVideoProvider, getVideoSourceInfo, extractErrorMessage } from '@/lib/utils';
+import { detectVideoProvider, getVideoSourceInfo, extractErrorMessage, getDailymotionId, isDailymotionCustomPlayerUrl, buildDailymotionCustomPlayerUrl } from '@/lib/utils';
 import { uploadFile, createVideo } from '@/lib/admin';
 import type { VideoStatus } from '@/types';
 
@@ -35,6 +35,8 @@ export function UploadForm({ onUploaded }: UploadFormProps) {
   const [trailerSlot, setTrailerSlot] = useState<FileSlot>({ file: null, previewUrl: null });
   const [videoMode, setVideoMode] = useState<'file' | 'external'>('file');
   const [videoUrl, setVideoUrl] = useState('');
+  const [dailymotionPlayerMode, setDailymotionPlayerMode] = useState<'original' | 'custom'>('original');
+  const [dailymotionPlayerId, setDailymotionPlayerId] = useState('');
 
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -63,6 +65,8 @@ export function UploadForm({ onUploaded }: UploadFormProps) {
     setTrailerSlot({ file: null, previewUrl: null });
     setVideoMode('file');
     setVideoUrl('');
+    setDailymotionPlayerMode('original');
+    setDailymotionPlayerId('');
     setProgress(0);
   };
 
@@ -106,9 +110,16 @@ export function UploadForm({ onUploaded }: UploadFormProps) {
         : null;
       bump();
 
-      const finalVideoUrl = videoMode === 'external'
+      let finalVideoUrl = videoMode === 'external'
         ? videoUrl.trim()
         : (await uploadFile('videos', videoSlot.file!)).publicUrl;
+
+      if (videoMode === 'external' && detectVideoProvider(videoUrl.trim()) === 'dailymotion' && dailymotionPlayerMode === 'custom' && dailymotionPlayerId.trim()) {
+        const dmId = getDailymotionId(videoUrl.trim());
+        if (dmId) {
+          finalVideoUrl = buildDailymotionCustomPlayerUrl(dailymotionPlayerId.trim(), dmId);
+        }
+      }
       bump();
 
       const trailerUrl = trailerSlot.file
@@ -277,7 +288,16 @@ export function UploadForm({ onUploaded }: UploadFormProps) {
                   placeholder="Paste a YouTube, Vimeo, Dailymotion, Streamable, Loom, Wistia, ScreenApp, direct video, or any embeddable URL"
                 />
                 {(() => {
-                  const info = getVideoSourceInfo(videoUrl.trim());
+                  const trimmedUrl = videoUrl.trim();
+                  const isDailymotion = detectVideoProvider(trimmedUrl) === 'dailymotion';
+                  let previewUrl = trimmedUrl;
+                  if (isDailymotion && dailymotionPlayerMode === 'custom' && dailymotionPlayerId.trim()) {
+                    const dmId = getDailymotionId(trimmedUrl);
+                    if (dmId) {
+                      previewUrl = buildDailymotionCustomPlayerUrl(dailymotionPlayerId.trim(), dmId);
+                    }
+                  }
+                  const info = getVideoSourceInfo(previewUrl);
                   if (!info.embedUrl) return null;
                   return (
                     <div className="rounded-lg border border-ink-border bg-ink-soft p-2">
@@ -290,6 +310,49 @@ export function UploadForm({ onUploaded }: UploadFormProps) {
                           allowFullScreen
                         />
                       </div>
+                    </div>
+                  );
+                })()}
+                {(() => {
+                  const isDailymotion = detectVideoProvider(videoUrl.trim()) === 'dailymotion';
+                  if (!isDailymotion) return null;
+                  return (
+                    <div className="rounded-lg border border-ink-border bg-ink-soft p-3">
+                      <label className="mb-2 block text-sm font-medium text-neutral-300">Dailymotion Player</label>
+                      <div className="mb-3 flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setDailymotionPlayerMode('original')}
+                          className={`rounded-lg px-3 py-1.5 text-sm transition-colors ${
+                            dailymotionPlayerMode === 'original' ? 'bg-primary text-white' : 'bg-white/5 text-neutral-400 hover:bg-white/10'
+                          }`}
+                        >
+                          Original Embed URL
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setDailymotionPlayerMode('custom')}
+                          className={`rounded-lg px-3 py-1.5 text-sm transition-colors ${
+                            dailymotionPlayerMode === 'custom' ? 'bg-primary text-white' : 'bg-white/5 text-neutral-400 hover:bg-white/10'
+                          }`}
+                        >
+                          Custom Dailymotion Player ID
+                        </button>
+                      </div>
+                      {dailymotionPlayerMode === 'custom' && (
+                        <div>
+                          <input
+                            type="text"
+                            value={dailymotionPlayerId}
+                            onChange={(e) => setDailymotionPlayerId(e.target.value)}
+                            className="input-field"
+                            placeholder="e.g. x1x2x3x"
+                          />
+                          <p className="mt-1.5 text-xs text-neutral-500">
+                            Enter your Dailymotion custom player ID. The video will use your branded player instead of the default embed.
+                          </p>
+                        </div>
+                      )}
                     </div>
                   );
                 })()}

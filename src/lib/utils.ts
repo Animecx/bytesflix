@@ -87,9 +87,19 @@ function getVimeoId(url: string): string | null {
   return m ? m[1] : null;
 }
 
-function getDailymotionId(url: string): string | null {
+export function getDailymotionId(url: string): string | null {
+  const customMatch = url.match(/dailymotion\.com\/player\/[\w.-]+\.html\?.*video=([a-zA-Z0-9]+)/);
+  if (customMatch) return customMatch[1];
   const m = url.match(/dailymotion\.com\/(?:video\/|embed\/video\/|swf\/video\/|swf\/)([a-zA-Z0-9]+)/) ?? url.match(/dai\.ly\/([a-zA-Z0-9]+)/);
   return m ? m[1] : null;
+}
+
+export function isDailymotionCustomPlayerUrl(url: string): boolean {
+  return /dailymotion\.com\/player\/[\w.-]+\.html\?.*video=/.test(url.trim());
+}
+
+export function buildDailymotionCustomPlayerUrl(playerId: string, videoId: string): string {
+  return `https://www.dailymotion.com/player/${playerId}.html?video=${videoId}`;
 }
 
 function getStreamableId(url: string): string | null {
@@ -157,6 +167,9 @@ export function getVideoSourceInfo(url: string): VideoSourceInfo {
     }
     case 'dailymotion': {
       const id = getDailymotionId(u);
+      if (isDailymotionCustomPlayerUrl(u)) {
+        return { provider, id, embedUrl: u };
+      }
       return { provider, id, embedUrl: id ? `https://www.dailymotion.com/embed/video/${id}` : null };
     }
     case 'streamable': {
