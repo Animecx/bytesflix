@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Play, Plus, Check, Star, Clock, Calendar, Globe } from 'lucide-react';
 import type { Video } from '@/types';
-import { formatDuration, formatViews } from '@/lib/utils';
+import { formatDuration } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
 import { toggleFavorite } from '@/lib/userData';
 
@@ -108,7 +108,6 @@ export function HeroBanner({ video }: HeroBannerProps) {
                   {isFav ? 'In My List' : 'My List'}
                 </button>
               )}
-              <span className="text-sm text-neutral-400">{formatViews(video.views)}</span>
             </div>
           </div>
         </div>

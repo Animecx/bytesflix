@@ -16,7 +16,7 @@ import {
   addToWatchHistory, toggleFavorite, isFavorite,
 } from '@/lib/userData';
 import { useAuth } from '@/context/AuthContext';
-import { formatDuration, formatViews, formatDate } from '@/lib/utils';
+import { formatDuration, formatDate } from '@/lib/utils';
 import type { Video, Episode } from '@/types';
 
 export default function Watch() {
@@ -201,7 +201,6 @@ export default function Watch() {
                 {video.age_rating ? (
                   <span className="rounded border border-white/30 px-1.5 py-0.5 text-xs">{video.age_rating}</span>
                 ) : null}
-                <span className="text-neutral-500">{formatViews(video.views)}</span>
               </div>
 
               {video.description && (

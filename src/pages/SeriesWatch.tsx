@@ -14,7 +14,7 @@ import {
   addToWatchHistory, toggleFavorite, isFavorite,
 } from '@/lib/userData';
 import { useAuth } from '@/context/AuthContext';
-import { formatDuration, formatViews, formatDate } from '@/lib/utils';
+import { formatDuration, formatDate } from '@/lib/utils';
 import type { SeriesWithEpisodes, EpisodeWithVideo } from '@/types';
 
 export default function SeriesWatch() {
@@ -270,7 +270,6 @@ export default function SeriesWatch() {
                 ) : null}
                 {series.language ? <span className="flex items-center gap-1"><Globe className="h-4 w-4" />{series.language}</span> : null}
                 {series.age_rating ? <span className="rounded border border-white/30 px-1.5 py-0.5 text-xs">{series.age_rating}</span> : null}
-                {video && <span className="text-neutral-500">{formatViews(video.views)}</span>}
               </div>
 
               {currentEpisode?.description ? (

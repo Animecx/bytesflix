@@ -6,7 +6,7 @@ import {
   ChevronRight, ListVideo,
 } from 'lucide-react';
 import { fetchSeriesWithEpisodesById } from '@/lib/videos';
-import { formatDuration, formatViews } from '@/lib/utils';
+import { formatDuration } from '@/lib/utils';
 import type { SeriesWithEpisodes, EpisodeWithVideo } from '@/types';
 
 export default function SeriesDetail() {
@@ -227,7 +227,6 @@ export default function SeriesDetail() {
                       )}
                       <div className="mt-1 flex items-center gap-3 text-xs text-neutral-500">
                         {ep.duration_minutes && <span>{formatDuration(ep.duration_minutes)}</span>}
-                        {ep.video && <span>{formatViews(ep.video.views)}</span>}
                       </div>
                     </div>
 
