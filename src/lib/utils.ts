@@ -139,6 +139,20 @@ function isEmbeddableUrl(url: string): boolean {
   }
 }
 
+export function isExternalHlsRedirectUrl(url: string): boolean {
+  try {
+    const u = new URL(url.trim());
+    return (
+      u.protocol === 'https:' &&
+      u.hostname === 'img1.fcxmb.com' &&
+      u.pathname.startsWith('/hls_mps/') &&
+      u.pathname.endsWith('.m3u8')
+    );
+  } catch {
+    return false;
+  }
+}
+
 export function detectVideoProvider(url: string): VideoProvider {
   const u = url.trim().toLowerCase();
   if (getYouTubeId(u)) return 'youtube';

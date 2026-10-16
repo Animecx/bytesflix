@@ -1,4 +1,5 @@
-import { detectVideoProvider, getVideoSourceInfo, type VideoProvider } from '@/lib/utils';
+import { ExternalLink, AlertTriangle } from 'lucide-react';
+import { detectVideoProvider, getVideoSourceInfo, isExternalHlsRedirectUrl, type VideoProvider } from '@/lib/utils';
 import { VideoPlayer } from '@/components/VideoPlayer';
 import { EmbedPlayer } from '@/components/EmbedPlayer';
 
@@ -50,6 +51,26 @@ export function UnifiedPlayer({
 }: UnifiedPlayerProps) {
   const provider = detectVideoProvider(url);
   const sourceInfo = getVideoSourceInfo(url);
+
+  if (isExternalHlsRedirectUrl(url)) {
+    return (
+      <div className="relative flex aspect-video w-full flex-col items-center justify-center gap-4 overflow-hidden rounded-xl bg-black px-6 text-center">
+        <AlertTriangle className="h-12 w-12 text-warning" />
+        <div>
+          <p className="text-lg font-semibold text-white">This video can only be played in a new tab.</p>
+          <p className="mt-1 text-sm text-neutral-400">The provider does not allow embedded playback on this site.</p>
+        </div>
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-primary"
+        >
+          <ExternalLink className="h-5 w-5" /> Open in New Tab
+        </a>
+      </div>
+    );
+  }
 
   if (isEmbedProvider(provider) && sourceInfo.embedUrl) {
     return <EmbedPlayer url={url} title={title} autoPlay={autoPlay} />;
